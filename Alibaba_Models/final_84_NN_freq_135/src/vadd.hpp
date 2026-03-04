@@ -2,6 +2,11 @@
 
 #include "constants.hpp"
 
+struct t_idx_pack {
+    int indices[38];
+};
+
+
 extern "C" {
 
 void vadd(  
@@ -22,7 +27,8 @@ void vadd(
     const t_axi* table_HBM28, const t_axi* table_HBM29, 
     const t_axi* table_HBM30, const t_axi* table_HBM31, 
     const t_axi* table_DDR0, const t_axi* table_DDR1,
-    D_TYPE* out_PLRAM
+    hls::stream<t_idx_pack>& idx_in,
+    hls::stream<D_TYPE>& out_PLRAM
     );
 }
 
@@ -113,7 +119,7 @@ void output_layer(
 
 void write_result(
     hls::stream<D_TYPE>& s_result_out,
-    D_TYPE results_out[BATCH_SIZE * OUTPUT_SIZE]);
+    hls::stream<D_TYPE>& out_PLRAM);
 
 template<const int FEATURE_SIZE>
 void replicate_feature_1PEs(

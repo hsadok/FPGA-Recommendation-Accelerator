@@ -18,7 +18,8 @@ void vadd(
     const t_axi* table_HBM28, const t_axi* table_HBM29, 
     const t_axi* table_HBM30, const t_axi* table_HBM31, 
     const t_axi* table_DDR0, const t_axi* table_DDR1,
-    D_TYPE* out_PLRAM
+    hls::stream<t_idx_pack>& idx_in,
+    hls::stream<D_TYPE>& out_PLRAM
     )
 {
     
@@ -59,7 +60,8 @@ void vadd(
 #pragma HLS INTERFACE m_axi port=table_DDR1  offset=slave bundle=gmem33
 
 // PLRAM
-#pragma HLS INTERFACE m_axi port=out_PLRAM offset=slave bundle=gmem34
+#pragma HLS INTERFACE axis port=idx_in
+#pragma HLS INTERFACE axis port=out_PLRAM
 
 #pragma HLS INTERFACE s_axilite port=table_HBM0  bundle=control
 #pragma HLS INTERFACE s_axilite port=table_HBM1  bundle=control
@@ -97,7 +99,6 @@ void vadd(
 #pragma HLS INTERFACE s_axilite port=table_DDR0  bundle=control
 #pragma HLS INTERFACE s_axilite port=table_DDR1  bundle=control
 
-#pragma HLS INTERFACE s_axilite port=out_PLRAM bundle=control
 
 #pragma HLS INTERFACE s_axilite port=return bundle=control
     
@@ -1505,6 +1506,7 @@ void vadd(
         ADDR_AXI_PLRAM_15, AXI_PADDED_SIZE_PLRAM_15, DATA_SIZE_PLRAM_15, TABLE_SIZE_PLRAM_15, 15>(table_PLRAM3);
 
     load_access_idx(
+        idx_in,
         s_idx_buffer_HBM0, s_idx_buffer_HBM1, s_idx_buffer_HBM2, s_idx_buffer_HBM3, 
         s_idx_buffer_HBM4, s_idx_buffer_HBM5, s_idx_buffer_HBM6, s_idx_buffer_HBM7, 
         s_idx_buffer_HBM8, s_idx_buffer_HBM9, s_idx_buffer_HBM10, s_idx_buffer_HBM11, 
@@ -2372,6 +2374,7 @@ void init_PLRAM_4_tables(
 }
 
 void load_access_idx(
+    hls::stream<t_idx_pack>& idx_in,
     hls::stream<int>& s_idx_buffer_HBM0, hls::stream<int>& s_idx_buffer_HBM1, 
     hls::stream<int>& s_idx_buffer_HBM2, hls::stream<int>& s_idx_buffer_HBM3, 
     hls::stream<int>& s_idx_buffer_HBM4, hls::stream<int>& s_idx_buffer_HBM5, 
@@ -2390,71 +2393,53 @@ void load_access_idx(
     hls::stream<int>& s_idx_buffer_HBM30, hls::stream<int>& s_idx_buffer_HBM31, 
     hls::stream<int>& s_idx_buffer_DDR0, hls::stream<int>& s_idx_buffer_DDR1,
     hls::stream<int>& s_idx_buffer_PLRAM0, hls::stream<int>& s_idx_buffer_PLRAM1, 
-    hls::stream<int>& s_idx_buffer_PLRAM2, hls::stream<int>& s_idx_buffer_PLRAM3) { 
+    hls::stream<int>& s_idx_buffer_PLRAM2, hls::stream<int>& s_idx_buffer_PLRAM3) {
+    for (int i = 0; i < trip_count_item_num; i++) {
+        #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
+        #pragma HLS pipeline II=1
 
-    int idx_HBM0, idx_HBM1, idx_HBM2, idx_HBM3, 
-        idx_HBM4, idx_HBM5, idx_HBM6, idx_HBM7, 
-        idx_HBM8, idx_HBM9, idx_HBM10, idx_HBM11, 
-        idx_HBM12, idx_HBM13, idx_HBM14, idx_HBM15, 
-        idx_HBM16, idx_HBM17, idx_HBM18, idx_HBM19, 
-        idx_HBM20, idx_HBM21, idx_HBM22, idx_HBM23, 
-        idx_HBM24, idx_HBM25, idx_HBM26, idx_HBM27, 
-        idx_HBM28, idx_HBM29, idx_HBM30, idx_HBM31;
-    int idx_PLRAM0, idx_PLRAM1, idx_PLRAM2, idx_PLRAM3;
-    int idx_DDR0, idx_DDR1;
+        t_idx_pack current_idx = idx_in.read();
 
-    // batch = 32
-    int idx_random[] = {3, 99, 38, 72, 29, 57, 1, 72, 36, 76, 35, 50, 37, 57, 
-        13, 66, 26, 70, 41, 93, 48, 82, 44, 78, 25, 52, 3, 92, 36, 56, 46, 88};
-
-    for (int i = 0; i < BATCH_NUM; i++) {
-        
-        for (int j = 0; j < BATCH_SIZE; j++) {
-            #pragma HLS pipeline II=1
-
-            int idx = idx_random[j];
-
-            s_idx_buffer_HBM0.write(idx);
-            s_idx_buffer_HBM1.write(idx);
-            s_idx_buffer_HBM2.write(idx);
-            s_idx_buffer_HBM3.write(idx);
-            s_idx_buffer_HBM4.write(idx);
-            s_idx_buffer_HBM5.write(idx);
-            s_idx_buffer_HBM6.write(idx);
-            s_idx_buffer_HBM7.write(idx);
-            s_idx_buffer_HBM8.write(idx);
-            s_idx_buffer_HBM9.write(idx);
-            s_idx_buffer_HBM10.write(idx);
-            s_idx_buffer_HBM11.write(idx);
-            s_idx_buffer_HBM12.write(idx);
-            s_idx_buffer_HBM13.write(idx);
-            s_idx_buffer_HBM14.write(idx);
-            s_idx_buffer_HBM15.write(idx);
-            s_idx_buffer_HBM16.write(idx);
-            s_idx_buffer_HBM17.write(idx);
-            s_idx_buffer_HBM18.write(idx);
-            s_idx_buffer_HBM19.write(idx);
-            s_idx_buffer_HBM20.write(idx);
-            s_idx_buffer_HBM21.write(idx);
-            s_idx_buffer_HBM22.write(idx);
-            s_idx_buffer_HBM23.write(idx);
-            s_idx_buffer_HBM24.write(idx);
-            s_idx_buffer_HBM25.write(idx);
-            s_idx_buffer_HBM26.write(idx);
-            s_idx_buffer_HBM27.write(idx);
-            s_idx_buffer_HBM28.write(idx);
-            s_idx_buffer_HBM29.write(idx);
-            s_idx_buffer_HBM30.write(idx);
-            s_idx_buffer_HBM31.write(idx);
-
-            s_idx_buffer_DDR0.write(idx);
-            s_idx_buffer_DDR1.write(idx);
-
-            s_idx_buffer_PLRAM0.write(idx);
-            s_idx_buffer_PLRAM1.write(idx);
-            s_idx_buffer_PLRAM2.write(idx);
-            s_idx_buffer_PLRAM3.write(idx);
-        }
+        s_idx_buffer_HBM0.write(current_idx.indices[0]);
+        s_idx_buffer_HBM1.write(current_idx.indices[1]);
+        s_idx_buffer_HBM2.write(current_idx.indices[2]);
+        s_idx_buffer_HBM3.write(current_idx.indices[3]);
+        s_idx_buffer_HBM4.write(current_idx.indices[4]);
+        s_idx_buffer_HBM5.write(current_idx.indices[5]);
+        s_idx_buffer_HBM6.write(current_idx.indices[6]);
+        s_idx_buffer_HBM7.write(current_idx.indices[7]);
+        s_idx_buffer_HBM8.write(current_idx.indices[8]);
+        s_idx_buffer_HBM9.write(current_idx.indices[9]);
+        s_idx_buffer_HBM10.write(current_idx.indices[10]);
+        s_idx_buffer_HBM11.write(current_idx.indices[11]);
+        s_idx_buffer_HBM12.write(current_idx.indices[12]);
+        s_idx_buffer_HBM13.write(current_idx.indices[13]);
+        s_idx_buffer_HBM14.write(current_idx.indices[14]);
+        s_idx_buffer_HBM15.write(current_idx.indices[15]);
+        s_idx_buffer_HBM16.write(current_idx.indices[16]);
+        s_idx_buffer_HBM17.write(current_idx.indices[17]);
+        s_idx_buffer_HBM18.write(current_idx.indices[18]);
+        s_idx_buffer_HBM19.write(current_idx.indices[19]);
+        s_idx_buffer_HBM20.write(current_idx.indices[20]);
+        s_idx_buffer_HBM21.write(current_idx.indices[21]);
+        s_idx_buffer_HBM22.write(current_idx.indices[22]);
+        s_idx_buffer_HBM23.write(current_idx.indices[23]);
+        s_idx_buffer_HBM24.write(current_idx.indices[24]);
+        s_idx_buffer_HBM25.write(current_idx.indices[25]);
+        s_idx_buffer_HBM26.write(current_idx.indices[26]);
+        s_idx_buffer_HBM27.write(current_idx.indices[27]);
+        s_idx_buffer_HBM28.write(current_idx.indices[28]);
+        s_idx_buffer_HBM29.write(current_idx.indices[29]);
+        s_idx_buffer_HBM30.write(current_idx.indices[30]);
+        s_idx_buffer_HBM31.write(current_idx.indices[31]);
+    
+        s_idx_buffer_DDR0.write(current_idx.indices[32]);
+        s_idx_buffer_DDR1.write(current_idx.indices[33]);
+    
+        s_idx_buffer_PLRAM0.write(current_idx.indices[34]);
+        s_idx_buffer_PLRAM1.write(current_idx.indices[35]);
+        s_idx_buffer_PLRAM2.write(current_idx.indices[36]);
+        s_idx_buffer_PLRAM3.write(current_idx.indices[37]);
     }
 }
 
@@ -2467,7 +2452,7 @@ void load_single_embedding_2_tables(
 #pragma HLS INLINE off
 
     // 8 < data size <= 16, load 2 times
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE; i++) {
+    for (int i = 0; i < trip_count_item_num; i++) {
         #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
 
         int idx =  s_idx_buffer.read();
@@ -2496,7 +2481,7 @@ void load_single_embedding_4_tables(
 #pragma HLS INLINE off
 
     // 8 < data size <= 16, load 2 times
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE; i++) {
+    for (int i = 0; i < trip_count_item_num; i++) {
         #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
 
         int idx =  s_idx_buffer.read();
@@ -2530,7 +2515,7 @@ void int_to_wide(
     hls::stream<W_TYPE>& s_embedding_buffer_wide) {
 #pragma HLS inline off
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE; i++) {
+    for (int i = 0; i < trip_count_item_num; i++) {
         #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
 
         for (int j = 0; j < VECTOR_LENGTH / INTS_PER_W; j++) {
@@ -2569,7 +2554,7 @@ void gather_embeddings(
 ) {
 #pragma HLS inline off
 
-    for (int item = 0; item < BATCH_NUM * BATCH_SIZE; item++) {
+    for (int item = 0; item < trip_count_item_num; item++) {
         for (int i = 0; i < VECTOR_SIZE_HBM_BANK_0 / INTS_PER_W; i++) {
             #pragma HLS pipeline II=1
             s_feature_in.write(s_embedding_buffer_wide_HBM0.read());
@@ -2745,7 +2730,7 @@ void matmul_PE_UNROLL8(
     init_weights<FEATURE_SIZE, ROW_PER_PE>(weights_transpose_local);
 
     item_loop:
-    for (int item = 0; item < BATCH_NUM * BATCH_SIZE; item++) {
+    for (int item = 0; item < trip_count_item_num; item++) {
         // read 
         read_loop:
         for (int i = 0; i < FEATURE_SIZE / INTS_PER_W; i++) {
@@ -3214,7 +3199,7 @@ void output_layer(
     }
 
     item_loop:
-    for (int item = 0; item < BATCH_NUM * BATCH_SIZE; item++) {
+    for (int item = 0; item < trip_count_item_num; item++) {
 
         read_loop:
         for (int i = 0; i < HIDDEN_SIZE3 / INTS_PER_W; i++) {
@@ -3249,21 +3234,14 @@ void output_layer(
 
 void write_result(
     hls::stream<D_TYPE>& s_result_out,
-    D_TYPE results_out[BATCH_SIZE * OUTPUT_SIZE]) {
+    hls::stream<D_TYPE>& out_PLRAM) {
     
-    D_TYPE result_last_batch[BATCH_SIZE * OUTPUT_SIZE];
-
-    for (int i = 0; i < BATCH_NUM; i++) {
-        for (int j = 0; j < BATCH_SIZE * OUTPUT_SIZE; j++) {
-            #pragma HLS pipeline II=1
-            result_last_batch[j] = s_result_out.read();
-        }
-    }
-
-    // only write back last batch to DRAM
-    for (int j = 0; j < BATCH_SIZE * OUTPUT_SIZE; j++) {
+    
+    for (int i = 0 ; i < trip_count_item_num * OUTPUT_SIZE; i++){
+        #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num*OUTPUT_SIZE max=trip_count_item_num*OUTPUT_SIZE
         #pragma HLS pipeline II=1
-        results_out[j] = result_last_batch[j];
+
+        out_PLRAM.write(s_result_out.read());
     }
 }
 
@@ -3273,7 +3251,7 @@ void replicate_feature_1PEs(
     hls::stream<W_TYPE>& s_feature_PE0
 ) {
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE * FEATURE_SIZE / INTS_PER_W; i++) {
+    for (int i = 0; i < trip_count_item_num * FEATURE_SIZE / INTS_PER_W; i++) {
         #pragma HLS pipeline II=1
 
         W_TYPE reg = s_feature_in.read();
@@ -3291,7 +3269,7 @@ void replicate_feature_8PEs(
     hls::stream<W_TYPE>& s_feature_PE6, hls::stream<W_TYPE>& s_feature_PE7
 ) {
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE * FEATURE_SIZE / INTS_PER_W; i++) {
+    for (int i = 0; i < trip_count_item_num * FEATURE_SIZE / INTS_PER_W; i++) {
         #pragma HLS pipeline II=1
 
         W_TYPE reg = s_feature_in.read();
@@ -3320,7 +3298,7 @@ void replicate_feature_16PEs(
     hls::stream<W_TYPE>& s_feature_PE14, hls::stream<W_TYPE>& s_feature_PE15
 ) {
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE * FEATURE_SIZE / INTS_PER_W; i++) {
+    for (int i = 0; i < trip_count_item_num * FEATURE_SIZE / INTS_PER_W; i++) {
         #pragma HLS pipeline II=1
 
         W_TYPE reg = s_feature_in.read();
@@ -3365,7 +3343,7 @@ void replicate_feature_32PEs(
     hls::stream<W_TYPE>& s_feature_PE30, hls::stream<W_TYPE>& s_feature_PE31
 ) {
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE * FEATURE_SIZE / INTS_PER_W; i++) {
+    for (int i = 0; i < trip_count_item_num * FEATURE_SIZE / INTS_PER_W; i++) {
         #pragma HLS pipeline II=1
 
         W_TYPE reg = s_feature_in.read();
@@ -3442,7 +3420,7 @@ void replicate_feature_64PEs(
     hls::stream<W_TYPE>& s_feature_PE62, hls::stream<W_TYPE>& s_feature_PE63
 ) {
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE * FEATURE_SIZE / INTS_PER_W; i++) {
+    for (int i = 0; i < trip_count_item_num * FEATURE_SIZE / INTS_PER_W; i++) {
         #pragma HLS pipeline II=1
 
         W_TYPE reg = s_feature_in.read();
@@ -3583,7 +3561,7 @@ void replicate_feature_128PEs(
     hls::stream<W_TYPE>& s_feature_PE126, hls::stream<W_TYPE>& s_feature_PE127
 ) {
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE * FEATURE_SIZE / INTS_PER_W; i++) {
+    for (int i = 0; i < trip_count_item_num * FEATURE_SIZE / INTS_PER_W; i++) {
         #pragma HLS pipeline II=1
 
         W_TYPE reg = s_feature_in.read();
@@ -3741,7 +3719,7 @@ void gather_results_32PEs<8>(
     hls::stream<W_TYPE>& s_result_all) {
      
     for_each_item:
-    for (int item = 0; item < BATCH_NUM * BATCH_SIZE; item++) {
+    for (int item = 0; item < trip_count_item_num; item++) {
         #pragma HLS pipeline II=64  // write 1 result_all per CC
 
         W_TYPE reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7, 
@@ -4243,7 +4221,7 @@ void gather_results_128PEs<4>(
     hls::stream<W_TYPE>& s_result_all) {
 
     for_each_item:
-    for (int item = 0; item < BATCH_NUM * BATCH_SIZE; item++) {
+    for (int item = 0; item < trip_count_item_num; item++) {
         #pragma HLS pipeline II=128  // write 1 result_all per CC
 
         W_TYPE reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7, 
@@ -5232,7 +5210,7 @@ void gather_results_128PEs<8>(
     hls::stream<W_TYPE>& s_result_all) {
      
     for_each_item:
-    for (int item = 0; item < BATCH_NUM * BATCH_SIZE; item++) {
+    for (int item = 0; item < trip_count_item_num; item++) {
         #pragma HLS pipeline II=256  // write 1 result_all per CC
 
         W_TYPE reg0, reg1, reg2, reg3, reg4, reg5, reg6, reg7, 
@@ -6941,7 +6919,7 @@ void consume_W(
     hls::stream<W_TYPE>& s_feature_in
 ) {
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE * FEATURE_SIZE / INTS_PER_W; i++) {
+    for (int i = 0; i < trip_count_item_num * FEATURE_SIZE / INTS_PER_W; i++) {
         #pragma HLS pipeline II=1
 
         s_feature_in.read();
@@ -6954,7 +6932,7 @@ void consume_D(
     hls::stream<D_TYPE>& s_result_in
 ) {
 
-    for (int i = 0; i < BATCH_NUM * BATCH_SIZE * FEATURE_SIZE; i++) {
+    for (int i = 0; i < trip_count_item_num * FEATURE_SIZE; i++) {
         #pragma HLS pipeline II=1
 
         s_result_in.read();

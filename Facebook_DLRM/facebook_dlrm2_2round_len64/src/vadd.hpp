@@ -2,6 +2,10 @@
 
 #include "constants.hpp"
 
+struct t_idx_pack {
+    int indices[48];
+};
+
 extern "C" {
 
 void vadd(  
@@ -21,12 +25,13 @@ void vadd(
     const ap_int<AXI_WIDTH_HBM>* table_HBM26, const ap_int<AXI_WIDTH_HBM>* table_HBM27, 
     const ap_int<AXI_WIDTH_HBM>* table_HBM28, const ap_int<AXI_WIDTH_HBM>* table_HBM29, 
     const ap_int<AXI_WIDTH_HBM>* table_HBM30, const ap_int<AXI_WIDTH_HBM>* table_HBM31,
-    int *out
+    hls::stream<t_idx_pack>& idx_in,
+    hls::stream<int>& out
     );
 }
 
 void load_access_idx(
-    // const int access_idx_local[BATCH_SIZE * BATCH_NUM], 
+    hls::stream<t_idx_pack>& idx_in,
     hls::stream<int>& s_idx_buffer_HBM0, hls::stream<int>& s_idx_buffer_HBM1, 
     hls::stream<int>& s_idx_buffer_HBM2, hls::stream<int>& s_idx_buffer_HBM3, 
     hls::stream<int>& s_idx_buffer_HBM4, hls::stream<int>& s_idx_buffer_HBM5, 
@@ -79,7 +84,7 @@ void reduction_add_all(
     hls::stream<int>& s_vout_buffer);
 
 void write_results(
-    hls::stream<int>& s_vout_buffer, int out_RAM[BATCH_SIZE]);
+    hls::stream<int>& s_vout_buffer, hls::stream<int>& out);
 
 
 const int trip_count_item_num = BATCH_NUM * BATCH_SIZE;
