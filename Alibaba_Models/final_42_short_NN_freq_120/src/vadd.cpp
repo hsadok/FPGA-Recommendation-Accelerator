@@ -23,38 +23,38 @@ void vadd(
     )
 {
     
-#pragma HLS INTERFACE m_axi port=table_HBM0  offset=slave bundle=gmem0
-#pragma HLS INTERFACE m_axi port=table_HBM1  offset=slave bundle=gmem1
-#pragma HLS INTERFACE m_axi port=table_HBM2  offset=slave bundle=gmem2
-#pragma HLS INTERFACE m_axi port=table_HBM3  offset=slave bundle=gmem3
-#pragma HLS INTERFACE m_axi port=table_HBM4  offset=slave bundle=gmem4
-#pragma HLS INTERFACE m_axi port=table_HBM5  offset=slave bundle=gmem5
-#pragma HLS INTERFACE m_axi port=table_HBM6  offset=slave bundle=gmem6
-#pragma HLS INTERFACE m_axi port=table_HBM7  offset=slave bundle=gmem7
-#pragma HLS INTERFACE m_axi port=table_HBM8  offset=slave bundle=gmem8
-#pragma HLS INTERFACE m_axi port=table_HBM9  offset=slave bundle=gmem9
-#pragma HLS INTERFACE m_axi port=table_HBM10  offset=slave bundle=gmem10
-#pragma HLS INTERFACE m_axi port=table_HBM11  offset=slave bundle=gmem11
-#pragma HLS INTERFACE m_axi port=table_HBM12  offset=slave bundle=gmem12
-#pragma HLS INTERFACE m_axi port=table_HBM13  offset=slave bundle=gmem13
-#pragma HLS INTERFACE m_axi port=table_HBM14  offset=slave bundle=gmem14
-#pragma HLS INTERFACE m_axi port=table_HBM15  offset=slave bundle=gmem15
-#pragma HLS INTERFACE m_axi port=table_HBM16  offset=slave bundle=gmem16
-#pragma HLS INTERFACE m_axi port=table_HBM17  offset=slave bundle=gmem17
-#pragma HLS INTERFACE m_axi port=table_HBM18  offset=slave bundle=gmem18
-#pragma HLS INTERFACE m_axi port=table_HBM19  offset=slave bundle=gmem19
-#pragma HLS INTERFACE m_axi port=table_HBM20  offset=slave bundle=gmem20
-#pragma HLS INTERFACE m_axi port=table_HBM21  offset=slave bundle=gmem21
-#pragma HLS INTERFACE m_axi port=table_HBM22  offset=slave bundle=gmem22
-#pragma HLS INTERFACE m_axi port=table_HBM23  offset=slave bundle=gmem23
-#pragma HLS INTERFACE m_axi port=table_HBM24  offset=slave bundle=gmem24
-#pragma HLS INTERFACE m_axi port=table_HBM25  offset=slave bundle=gmem25
-#pragma HLS INTERFACE m_axi port=table_HBM26  offset=slave bundle=gmem26
-#pragma HLS INTERFACE m_axi port=table_HBM27  offset=slave bundle=gmem27
-#pragma HLS INTERFACE m_axi port=table_HBM28  offset=slave bundle=gmem28
-#pragma HLS INTERFACE m_axi port=table_HBM29  offset=slave bundle=gmem29
-#pragma HLS INTERFACE m_axi port=table_HBM30  offset=slave bundle=gmem30
-#pragma HLS INTERFACE m_axi port=table_HBM31  offset=slave bundle=gmem31
+#pragma HLS INTERFACE m_axi port=table_HBM0  offset=slave bundle=gmem0  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM1  offset=slave bundle=gmem1  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM2  offset=slave bundle=gmem2  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM3  offset=slave bundle=gmem3  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM4  offset=slave bundle=gmem4  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM5  offset=slave bundle=gmem5  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM6  offset=slave bundle=gmem6  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM7  offset=slave bundle=gmem7  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM8  offset=slave bundle=gmem8  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM9  offset=slave bundle=gmem9  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM10 offset=slave bundle=gmem10 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM11 offset=slave bundle=gmem11 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM12 offset=slave bundle=gmem12 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM13 offset=slave bundle=gmem13 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM14 offset=slave bundle=gmem14 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM15 offset=slave bundle=gmem15 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM16 offset=slave bundle=gmem16 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM17 offset=slave bundle=gmem17 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM18 offset=slave bundle=gmem18 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM19 offset=slave bundle=gmem19 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM20 offset=slave bundle=gmem20 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM21 offset=slave bundle=gmem21 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM22 offset=slave bundle=gmem22 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM23 offset=slave bundle=gmem23 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM24 offset=slave bundle=gmem24 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM25 offset=slave bundle=gmem25 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM26 offset=slave bundle=gmem26 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM27 offset=slave bundle=gmem27 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM28 offset=slave bundle=gmem28 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM29 offset=slave bundle=gmem29 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM30 offset=slave bundle=gmem30 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM31 offset=slave bundle=gmem31 max_widen_bitwidth=256
 
 #pragma HLS INTERFACE m_axi port=table_DDR0  offset=slave bundle=gmem32
 #pragma HLS INTERFACE m_axi port=table_DDR1  offset=slave bundle=gmem33
