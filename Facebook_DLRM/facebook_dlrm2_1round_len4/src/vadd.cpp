@@ -1,5 +1,10 @@
 #include "vadd.hpp"
 
+static void reduction_add_pair(
+    hls::stream<int>& lhs,
+    hls::stream<int>& rhs,
+    hls::stream<int>& out);
+
 void vadd(  
     const ap_int<AXI_WIDTH_HBM>* table_HBM0, const ap_int<AXI_WIDTH_HBM>* table_HBM1, 
     const ap_int<AXI_WIDTH_HBM>* table_HBM2, const ap_int<AXI_WIDTH_HBM>* table_HBM3, 
@@ -21,79 +26,46 @@ void vadd(
     hls::stream<int>& out
     )
 {
-#pragma HLS DATAFLOW
+#pragma HLS DATAFLOW disable_start_propagation
 
-#pragma HLS INTERFACE m_axi port=table_HBM0  offset=slave bundle=gmem0  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM1  offset=slave bundle=gmem1  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM2  offset=slave bundle=gmem2  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM3  offset=slave bundle=gmem3  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM4  offset=slave bundle=gmem4  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM5  offset=slave bundle=gmem5  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM6  offset=slave bundle=gmem6  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM7  offset=slave bundle=gmem7  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM8  offset=slave bundle=gmem8  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM9  offset=slave bundle=gmem9  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM10 offset=slave bundle=gmem10 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM11 offset=slave bundle=gmem11 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM12 offset=slave bundle=gmem12 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM13 offset=slave bundle=gmem13 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM14 offset=slave bundle=gmem14 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM15 offset=slave bundle=gmem15 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM16 offset=slave bundle=gmem16 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM17 offset=slave bundle=gmem17 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM18 offset=slave bundle=gmem18 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM19 offset=slave bundle=gmem19 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM20 offset=slave bundle=gmem20 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM21 offset=slave bundle=gmem21 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM22 offset=slave bundle=gmem22 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM23 offset=slave bundle=gmem23 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM24 offset=slave bundle=gmem24 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM25 offset=slave bundle=gmem25 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM26 offset=slave bundle=gmem26 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM27 offset=slave bundle=gmem27 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM28 offset=slave bundle=gmem28 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM29 offset=slave bundle=gmem29 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM30 offset=slave bundle=gmem30 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM31 offset=slave bundle=gmem31 max_widen_bitwidth=256
+#pragma HLS INTERFACE ap_ctrl_none port=return
+
+#pragma HLS INTERFACE m_axi port=table_HBM0  offset=off bundle=gmem0  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM1  offset=off bundle=gmem1  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM2  offset=off bundle=gmem2  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM3  offset=off bundle=gmem3  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM4  offset=off bundle=gmem4  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM5  offset=off bundle=gmem5  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM6  offset=off bundle=gmem6  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM7  offset=off bundle=gmem7  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM8  offset=off bundle=gmem8  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM9  offset=off bundle=gmem9  max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM10 offset=off bundle=gmem10 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM11 offset=off bundle=gmem11 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM12 offset=off bundle=gmem12 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM13 offset=off bundle=gmem13 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM14 offset=off bundle=gmem14 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM15 offset=off bundle=gmem15 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM16 offset=off bundle=gmem16 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM17 offset=off bundle=gmem17 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM18 offset=off bundle=gmem18 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM19 offset=off bundle=gmem19 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM20 offset=off bundle=gmem20 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM21 offset=off bundle=gmem21 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM22 offset=off bundle=gmem22 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM23 offset=off bundle=gmem23 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM24 offset=off bundle=gmem24 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM25 offset=off bundle=gmem25 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM26 offset=off bundle=gmem26 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM27 offset=off bundle=gmem27 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM28 offset=off bundle=gmem28 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM29 offset=off bundle=gmem29 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM30 offset=off bundle=gmem30 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM31 offset=off bundle=gmem31 max_widen_bitwidth=256
 
 #pragma HLS INTERFACE axis port=idx_in
 #pragma HLS INTERFACE axis port=out
 
-#pragma HLS INTERFACE s_axilite port=table_HBM0  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM1  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM2  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM3  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM4  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM5  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM6  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM7  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM8  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM9  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM10  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM11  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM12  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM13  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM14  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM15  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM16  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM17  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM18  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM19  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM20  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM21  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM22  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM23  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM24  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM25  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM26  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM27  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM28  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM29  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM30  bundle=control
-#pragma HLS INTERFACE s_axilite port=table_HBM31  bundle=control
-#pragma HLS INTERFACE s_axilite port=access_idx bundle=control
-
-#pragma HLS INTERFACE s_axilite port=return bundle=control
 
     hls::stream<t_hbm> s_embedding_buffer_HBM0;
     hls::stream<t_hbm> s_embedding_buffer_HBM1;
@@ -293,6 +265,67 @@ void vadd(
     hls::stream<int> s_vout_buffer; 
 #pragma HLS stream variable=s_vout_buffer depth=fifo_batch_size
 
+    hls::stream<int> s_reduce_stage1_0;
+    hls::stream<int> s_reduce_stage1_1;
+    hls::stream<int> s_reduce_stage1_2;
+    hls::stream<int> s_reduce_stage1_3;
+    hls::stream<int> s_reduce_stage1_4;
+    hls::stream<int> s_reduce_stage1_5;
+    hls::stream<int> s_reduce_stage1_6;
+    hls::stream<int> s_reduce_stage1_7;
+    hls::stream<int> s_reduce_stage1_8;
+    hls::stream<int> s_reduce_stage1_9;
+    hls::stream<int> s_reduce_stage1_10;
+    hls::stream<int> s_reduce_stage1_11;
+    hls::stream<int> s_reduce_stage1_12;
+    hls::stream<int> s_reduce_stage1_13;
+    hls::stream<int> s_reduce_stage1_14;
+    hls::stream<int> s_reduce_stage1_15;
+    hls::stream<int> s_reduce_stage2_0;
+    hls::stream<int> s_reduce_stage2_1;
+    hls::stream<int> s_reduce_stage2_2;
+    hls::stream<int> s_reduce_stage2_3;
+    hls::stream<int> s_reduce_stage2_4;
+    hls::stream<int> s_reduce_stage2_5;
+    hls::stream<int> s_reduce_stage2_6;
+    hls::stream<int> s_reduce_stage2_7;
+    hls::stream<int> s_reduce_stage3_0;
+    hls::stream<int> s_reduce_stage3_1;
+    hls::stream<int> s_reduce_stage3_2;
+    hls::stream<int> s_reduce_stage3_3;
+    hls::stream<int> s_reduce_stage4_0;
+    hls::stream<int> s_reduce_stage4_1;
+#pragma HLS stream variable=s_reduce_stage1_0 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_1 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_2 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_3 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_4 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_5 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_6 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_7 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_8 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_9 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_10 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_11 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_12 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_13 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_14 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage1_15 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage2_0 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage2_1 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage2_2 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage2_3 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage2_4 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage2_5 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage2_6 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage2_7 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage3_0 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage3_1 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage3_2 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage3_3 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage4_0 depth=fifo_batch_size
+#pragma HLS stream variable=s_reduce_stage4_1 depth=fifo_batch_size
+
     load_access_idx(
         idx_in,
         s_idx_buffer_HBM0, s_idx_buffer_HBM1, s_idx_buffer_HBM2, s_idx_buffer_HBM3, 
@@ -406,16 +439,41 @@ void vadd(
     reduction_add_single<VECTOR_SIZE_HBM_BANK_30>(s_embedding_buffer_HBM30, s_result_buffer_HBM30);
     reduction_add_single<VECTOR_SIZE_HBM_BANK_31>(s_embedding_buffer_HBM31, s_result_buffer_HBM31);
 
-    reduction_add_all(
-        s_result_buffer_HBM0, s_result_buffer_HBM1, s_result_buffer_HBM2, s_result_buffer_HBM3, 
-        s_result_buffer_HBM4, s_result_buffer_HBM5, s_result_buffer_HBM6, s_result_buffer_HBM7, 
-        s_result_buffer_HBM8, s_result_buffer_HBM9, s_result_buffer_HBM10, s_result_buffer_HBM11, 
-        s_result_buffer_HBM12, s_result_buffer_HBM13, s_result_buffer_HBM14, s_result_buffer_HBM15, 
-        s_result_buffer_HBM16, s_result_buffer_HBM17, s_result_buffer_HBM18, s_result_buffer_HBM19, 
-        s_result_buffer_HBM20, s_result_buffer_HBM21, s_result_buffer_HBM22, s_result_buffer_HBM23, 
-        s_result_buffer_HBM24, s_result_buffer_HBM25, s_result_buffer_HBM26, s_result_buffer_HBM27, 
-        s_result_buffer_HBM28, s_result_buffer_HBM29, s_result_buffer_HBM30, s_result_buffer_HBM31, 
-        s_vout_buffer);
+    reduction_add_pair(s_result_buffer_HBM0, s_result_buffer_HBM1, s_reduce_stage1_0);
+    reduction_add_pair(s_result_buffer_HBM2, s_result_buffer_HBM3, s_reduce_stage1_1);
+    reduction_add_pair(s_result_buffer_HBM4, s_result_buffer_HBM5, s_reduce_stage1_2);
+    reduction_add_pair(s_result_buffer_HBM6, s_result_buffer_HBM7, s_reduce_stage1_3);
+    reduction_add_pair(s_result_buffer_HBM8, s_result_buffer_HBM9, s_reduce_stage1_4);
+    reduction_add_pair(s_result_buffer_HBM10, s_result_buffer_HBM11, s_reduce_stage1_5);
+    reduction_add_pair(s_result_buffer_HBM12, s_result_buffer_HBM13, s_reduce_stage1_6);
+    reduction_add_pair(s_result_buffer_HBM14, s_result_buffer_HBM15, s_reduce_stage1_7);
+    reduction_add_pair(s_result_buffer_HBM16, s_result_buffer_HBM17, s_reduce_stage1_8);
+    reduction_add_pair(s_result_buffer_HBM18, s_result_buffer_HBM19, s_reduce_stage1_9);
+    reduction_add_pair(s_result_buffer_HBM20, s_result_buffer_HBM21, s_reduce_stage1_10);
+    reduction_add_pair(s_result_buffer_HBM22, s_result_buffer_HBM23, s_reduce_stage1_11);
+    reduction_add_pair(s_result_buffer_HBM24, s_result_buffer_HBM25, s_reduce_stage1_12);
+    reduction_add_pair(s_result_buffer_HBM26, s_result_buffer_HBM27, s_reduce_stage1_13);
+    reduction_add_pair(s_result_buffer_HBM28, s_result_buffer_HBM29, s_reduce_stage1_14);
+    reduction_add_pair(s_result_buffer_HBM30, s_result_buffer_HBM31, s_reduce_stage1_15);
+
+    reduction_add_pair(s_reduce_stage1_0, s_reduce_stage1_1, s_reduce_stage2_0);
+    reduction_add_pair(s_reduce_stage1_2, s_reduce_stage1_3, s_reduce_stage2_1);
+    reduction_add_pair(s_reduce_stage1_4, s_reduce_stage1_5, s_reduce_stage2_2);
+    reduction_add_pair(s_reduce_stage1_6, s_reduce_stage1_7, s_reduce_stage2_3);
+    reduction_add_pair(s_reduce_stage1_8, s_reduce_stage1_9, s_reduce_stage2_4);
+    reduction_add_pair(s_reduce_stage1_10, s_reduce_stage1_11, s_reduce_stage2_5);
+    reduction_add_pair(s_reduce_stage1_12, s_reduce_stage1_13, s_reduce_stage2_6);
+    reduction_add_pair(s_reduce_stage1_14, s_reduce_stage1_15, s_reduce_stage2_7);
+
+    reduction_add_pair(s_reduce_stage2_0, s_reduce_stage2_1, s_reduce_stage3_0);
+    reduction_add_pair(s_reduce_stage2_2, s_reduce_stage2_3, s_reduce_stage3_1);
+    reduction_add_pair(s_reduce_stage2_4, s_reduce_stage2_5, s_reduce_stage3_2);
+    reduction_add_pair(s_reduce_stage2_6, s_reduce_stage2_7, s_reduce_stage3_3);
+
+    reduction_add_pair(s_reduce_stage3_0, s_reduce_stage3_1, s_reduce_stage4_0);
+    reduction_add_pair(s_reduce_stage3_2, s_reduce_stage3_3, s_reduce_stage4_1);
+
+    reduction_add_pair(s_reduce_stage4_0, s_reduce_stage4_1, s_vout_buffer);
         
     write_results(s_vout_buffer, out); 
 }
@@ -440,10 +498,8 @@ void load_access_idx(
     hls::stream<int>& s_idx_buffer_HBM30, hls::stream<int>& s_idx_buffer_HBM31) { 
 
 
-    for (int i = 0; i < trip_count_item_num; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
+    while (true) {
         #pragma HLS pipeline II=1
-
         t_idx_pack current_idx = idx_in.read();
 
         s_idx_buffer_HBM0.write(current_idx.indices[0]);
@@ -487,10 +543,7 @@ void load_single_embedding_1_tables(
     hls::stream<t_hbm>& s_embedding_buffer) {
 #pragma HLS INLINE off
 
-    // 8 < data size <= 16, load 2 times
-    for (int i = 0; i < trip_count_item_num; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
-
+    while (true) {
         long idx = s_idx_buffer.read();
 
         long base_addr_0 = START_ADDR_0 + idx * AXI_PADDED_SIZE_0;
@@ -507,9 +560,7 @@ void reduction_add_single(
     hls::stream<int>& s_result_buffer)  {
 #pragma HLS INLINE off
 
-    for (int i = 0; i < trip_count_item_num; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
-
+    while (true) {
         // load the first and consume the rest
         int result = s_embedding_buffer.read();
         for (int j = 0; j < TOTAL_VECTOR_LENGTH - 1; j++) {
@@ -519,89 +570,50 @@ void reduction_add_single(
     }
 }
 
-void reduction_add_all(
-    hls::stream<int>& s_result_buffer_HBM0, hls::stream<int>& s_result_buffer_HBM1, 
-    hls::stream<int>& s_result_buffer_HBM2, hls::stream<int>& s_result_buffer_HBM3, 
-    hls::stream<int>& s_result_buffer_HBM4, hls::stream<int>& s_result_buffer_HBM5, 
-    hls::stream<int>& s_result_buffer_HBM6, hls::stream<int>& s_result_buffer_HBM7, 
-    hls::stream<int>& s_result_buffer_HBM8, hls::stream<int>& s_result_buffer_HBM9, 
-    hls::stream<int>& s_result_buffer_HBM10, hls::stream<int>& s_result_buffer_HBM11, 
-    hls::stream<int>& s_result_buffer_HBM12, hls::stream<int>& s_result_buffer_HBM13, 
-    hls::stream<int>& s_result_buffer_HBM14, hls::stream<int>& s_result_buffer_HBM15, 
-    hls::stream<int>& s_result_buffer_HBM16, hls::stream<int>& s_result_buffer_HBM17, 
-    hls::stream<int>& s_result_buffer_HBM18, hls::stream<int>& s_result_buffer_HBM19, 
-    hls::stream<int>& s_result_buffer_HBM20, hls::stream<int>& s_result_buffer_HBM21, 
-    hls::stream<int>& s_result_buffer_HBM22, hls::stream<int>& s_result_buffer_HBM23, 
-    hls::stream<int>& s_result_buffer_HBM24, hls::stream<int>& s_result_buffer_HBM25, 
-    hls::stream<int>& s_result_buffer_HBM26, hls::stream<int>& s_result_buffer_HBM27, 
-    hls::stream<int>& s_result_buffer_HBM28, hls::stream<int>& s_result_buffer_HBM29, 
-    hls::stream<int>& s_result_buffer_HBM30, hls::stream<int>& s_result_buffer_HBM31,
-    hls::stream<int>& s_vout_buffer) {
-        
-    for (int i = 0; i < trip_count_item_num; i++) {
-        #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
-        // #pragma HLS pipeline II=1
-        
-        int tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8, tmp9;
+static void reduction_add_pair(
+    hls::stream<int>& lhs,
+    hls::stream<int>& rhs,
+    hls::stream<int>& out) {
+#pragma HLS INLINE off
 
-        tmp0 = s_result_buffer_HBM0.read()+ s_result_buffer_HBM1.read()+ s_result_buffer_HBM2.read()+ s_result_buffer_HBM3.read(); 
-        tmp1 = s_result_buffer_HBM4.read()+ s_result_buffer_HBM5.read()+ s_result_buffer_HBM6.read()+ s_result_buffer_HBM7.read(); 
-        tmp2 = s_result_buffer_HBM8.read()+ s_result_buffer_HBM9.read()+ s_result_buffer_HBM10.read()+ s_result_buffer_HBM11.read(); 
-        tmp3 = s_result_buffer_HBM12.read()+ s_result_buffer_HBM13.read()+ s_result_buffer_HBM14.read()+ s_result_buffer_HBM15.read(); 
-        tmp4 = s_result_buffer_HBM16.read()+ s_result_buffer_HBM17.read()+ s_result_buffer_HBM18.read()+ s_result_buffer_HBM19.read(); 
-        tmp5 = s_result_buffer_HBM20.read()+ s_result_buffer_HBM21.read()+ s_result_buffer_HBM22.read()+ s_result_buffer_HBM23.read(); 
-        tmp6 = s_result_buffer_HBM24.read()+ s_result_buffer_HBM25.read()+ s_result_buffer_HBM26.read()+ s_result_buffer_HBM27.read(); 
-        tmp7 = s_result_buffer_HBM28.read()+ s_result_buffer_HBM29.read()+ s_result_buffer_HBM30.read()+ s_result_buffer_HBM31.read(); 
+    bool have_lhs = false;
+    bool have_rhs = false;
+    bool out_valid = false;
+    int lhs_val = 0;
+    int rhs_val = 0;
+    int out_val = 0;
 
-        // tmp8 = s_result_buffer_DDR0.read() + s_result_buffer_DDR1.read(); 
+    while (true) {
+        #pragma HLS pipeline II=1
 
-        // tmp9 = /*s_result_buffer_PLRAM0.read()+ s_result_buffer_PLRAM1.read()+ */s_result_buffer_PLRAM2.read()+ s_result_buffer_PLRAM3.read(); 
+        if (out_valid && !out.full()) {
+            out.write(out_val);
+            out_valid = false;
+        }
 
-        int result = tmp0 + tmp1 + tmp2 + tmp3 + tmp4 + tmp5 + tmp6 + tmp7; // + tmp8 + tmp9;
+        if (!have_lhs && !lhs.empty()) {
+            lhs_val = lhs.read();
+            have_lhs = true;
+        }
 
-        // s_result_buffer_HBM0.read();
-        // s_result_buffer_HBM1.read();
-        // s_result_buffer_HBM2.read();
-        // s_result_buffer_HBM3.read();
-        // s_result_buffer_HBM4.read();
-        // s_result_buffer_HBM5.read();
-        // s_result_buffer_HBM6.read();
-        // s_result_buffer_HBM7.read();
-        // s_result_buffer_HBM8.read();
-        // s_result_buffer_HBM9.read();
-        // s_result_buffer_HBM10.read();
-        // s_result_buffer_HBM11.read();
-        // s_result_buffer_HBM12.read();
-        // s_result_buffer_HBM13.read();
-        // s_result_buffer_HBM14.read();
-        // s_result_buffer_HBM15.read();
-        // s_result_buffer_HBM16.read();
-        // s_result_buffer_HBM17.read();
-        // s_result_buffer_HBM18.read();
-        // s_result_buffer_HBM19.read();
-        // s_result_buffer_HBM20.read();
-        // s_result_buffer_HBM21.read();
-        // s_result_buffer_HBM22.read();
-        // s_result_buffer_HBM23.read();
-        // s_result_buffer_HBM24.read();
-        // s_result_buffer_HBM25.read();
-        // s_result_buffer_HBM26.read();
-        // s_result_buffer_HBM27.read();
-        // s_result_buffer_HBM28.read();
-        // s_result_buffer_HBM29.read();
-        // s_result_buffer_HBM30.read();
+        if (!have_rhs && !rhs.empty()) {
+            rhs_val = rhs.read();
+            have_rhs = true;
+        }
 
-        // int result = s_result_buffer_HBM31.read() + s_result_buffer_PLRAM3.read() + s_result_buffer_DDR1.read();
-
-        s_vout_buffer.write(result);
+        if (!out_valid && have_lhs && have_rhs) {
+            out_val = lhs_val + rhs_val;
+            out_valid = true;
+            have_lhs = false;
+            have_rhs = false;
+        }
     }
- }
+}
 
 void write_results(
     hls::stream<int>& s_vout_buffer, hls::stream<int>& out) {
 
-    for (int i = 0 ; i < trip_count_item_num; i++){
-        #pragma HLS LOOP_TRIPCOUNT min=trip_count_item_num max=trip_count_item_num
+    while (true) {
         #pragma HLS pipeline II=1
         out.write(s_vout_buffer.read());
     }
