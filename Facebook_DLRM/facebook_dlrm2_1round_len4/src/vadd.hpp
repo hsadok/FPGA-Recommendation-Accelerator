@@ -9,22 +9,22 @@ struct t_idx_pack {
 extern "C" {
 
 void vadd(  
-    const ap_int<AXI_WIDTH_HBM>* table_HBM0, const ap_int<AXI_WIDTH_HBM>* table_HBM1, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM2, const ap_int<AXI_WIDTH_HBM>* table_HBM3, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM4, const ap_int<AXI_WIDTH_HBM>* table_HBM5, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM6, const ap_int<AXI_WIDTH_HBM>* table_HBM7, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM8, const ap_int<AXI_WIDTH_HBM>* table_HBM9, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM10, const ap_int<AXI_WIDTH_HBM>* table_HBM11, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM12, const ap_int<AXI_WIDTH_HBM>* table_HBM13, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM14, const ap_int<AXI_WIDTH_HBM>* table_HBM15, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM16, const ap_int<AXI_WIDTH_HBM>* table_HBM17, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM18, const ap_int<AXI_WIDTH_HBM>* table_HBM19, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM20, const ap_int<AXI_WIDTH_HBM>* table_HBM21, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM22, const ap_int<AXI_WIDTH_HBM>* table_HBM23, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM24, const ap_int<AXI_WIDTH_HBM>* table_HBM25, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM26, const ap_int<AXI_WIDTH_HBM>* table_HBM27, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM28, const ap_int<AXI_WIDTH_HBM>* table_HBM29, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM30, const ap_int<AXI_WIDTH_HBM>* table_HBM31,
+    const t_hbm_wide* table_HBM0, const t_hbm_wide* table_HBM1, 
+    const t_hbm_wide* table_HBM2, const t_hbm_wide* table_HBM3, 
+    const t_hbm_wide* table_HBM4, const t_hbm_wide* table_HBM5, 
+    const t_hbm_wide* table_HBM6, const t_hbm_wide* table_HBM7, 
+    const t_hbm_wide* table_HBM8, const t_hbm_wide* table_HBM9, 
+    const t_hbm_wide* table_HBM10, const t_hbm_wide* table_HBM11, 
+    const t_hbm_wide* table_HBM12, const t_hbm_wide* table_HBM13, 
+    const t_hbm_wide* table_HBM14, const t_hbm_wide* table_HBM15, 
+    const t_hbm_wide* table_HBM16, const t_hbm_wide* table_HBM17, 
+    const t_hbm_wide* table_HBM18, const t_hbm_wide* table_HBM19, 
+    const t_hbm_wide* table_HBM20, const t_hbm_wide* table_HBM21, 
+    const t_hbm_wide* table_HBM22, const t_hbm_wide* table_HBM23, 
+    const t_hbm_wide* table_HBM24, const t_hbm_wide* table_HBM25, 
+    const t_hbm_wide* table_HBM26, const t_hbm_wide* table_HBM27, 
+    const t_hbm_wide* table_HBM28, const t_hbm_wide* table_HBM29, 
+    const t_hbm_wide* table_HBM30, const t_hbm_wide* table_HBM31,
     hls::stream<t_idx_pack>& idx_in,
     hls::stream<int>& out
     );
@@ -51,7 +51,7 @@ void load_access_idx(
 
 template<const long START_ADDR_0, const long AXI_PADDED_SIZE_0>
 void load_single_embedding_1_tables(
-    hls::stream<int>& s_idx_buffer, const t_hbm* table_RAM, 
+    hls::stream<int>& s_idx_buffer, const t_hbm_wide* table_RAM, 
     hls::stream<t_hbm>& s_embedding_buffer);
 
 template<const int TOTAL_VECTOR_LENGTH>

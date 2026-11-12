@@ -6,22 +6,22 @@ static void reduction_add_pair(
     hls::stream<int>& out);
 
 void vadd(  
-    const ap_int<AXI_WIDTH_HBM>* table_HBM0, const ap_int<AXI_WIDTH_HBM>* table_HBM1, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM2, const ap_int<AXI_WIDTH_HBM>* table_HBM3, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM4, const ap_int<AXI_WIDTH_HBM>* table_HBM5, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM6, const ap_int<AXI_WIDTH_HBM>* table_HBM7, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM8, const ap_int<AXI_WIDTH_HBM>* table_HBM9, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM10, const ap_int<AXI_WIDTH_HBM>* table_HBM11, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM12, const ap_int<AXI_WIDTH_HBM>* table_HBM13, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM14, const ap_int<AXI_WIDTH_HBM>* table_HBM15, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM16, const ap_int<AXI_WIDTH_HBM>* table_HBM17, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM18, const ap_int<AXI_WIDTH_HBM>* table_HBM19, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM20, const ap_int<AXI_WIDTH_HBM>* table_HBM21, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM22, const ap_int<AXI_WIDTH_HBM>* table_HBM23, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM24, const ap_int<AXI_WIDTH_HBM>* table_HBM25, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM26, const ap_int<AXI_WIDTH_HBM>* table_HBM27, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM28, const ap_int<AXI_WIDTH_HBM>* table_HBM29, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM30, const ap_int<AXI_WIDTH_HBM>* table_HBM31,
+    const t_hbm_wide* table_HBM0, const t_hbm_wide* table_HBM1, 
+    const t_hbm_wide* table_HBM2, const t_hbm_wide* table_HBM3, 
+    const t_hbm_wide* table_HBM4, const t_hbm_wide* table_HBM5, 
+    const t_hbm_wide* table_HBM6, const t_hbm_wide* table_HBM7, 
+    const t_hbm_wide* table_HBM8, const t_hbm_wide* table_HBM9, 
+    const t_hbm_wide* table_HBM10, const t_hbm_wide* table_HBM11, 
+    const t_hbm_wide* table_HBM12, const t_hbm_wide* table_HBM13, 
+    const t_hbm_wide* table_HBM14, const t_hbm_wide* table_HBM15, 
+    const t_hbm_wide* table_HBM16, const t_hbm_wide* table_HBM17, 
+    const t_hbm_wide* table_HBM18, const t_hbm_wide* table_HBM19, 
+    const t_hbm_wide* table_HBM20, const t_hbm_wide* table_HBM21, 
+    const t_hbm_wide* table_HBM22, const t_hbm_wide* table_HBM23, 
+    const t_hbm_wide* table_HBM24, const t_hbm_wide* table_HBM25, 
+    const t_hbm_wide* table_HBM26, const t_hbm_wide* table_HBM27, 
+    const t_hbm_wide* table_HBM28, const t_hbm_wide* table_HBM29, 
+    const t_hbm_wide* table_HBM30, const t_hbm_wide* table_HBM31,
     hls::stream<t_idx_pack>& idx_in,
     hls::stream<int>& out
     )
@@ -30,38 +30,38 @@ void vadd(
 
 #pragma HLS INTERFACE ap_ctrl_none port=return
 
-#pragma HLS INTERFACE m_axi port=table_HBM0  offset=off bundle=gmem0  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM1  offset=off bundle=gmem1  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM2  offset=off bundle=gmem2  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM3  offset=off bundle=gmem3  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM4  offset=off bundle=gmem4  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM5  offset=off bundle=gmem5  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM6  offset=off bundle=gmem6  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM7  offset=off bundle=gmem7  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM8  offset=off bundle=gmem8  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM9  offset=off bundle=gmem9  max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM10 offset=off bundle=gmem10 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM11 offset=off bundle=gmem11 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM12 offset=off bundle=gmem12 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM13 offset=off bundle=gmem13 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM14 offset=off bundle=gmem14 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM15 offset=off bundle=gmem15 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM16 offset=off bundle=gmem16 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM17 offset=off bundle=gmem17 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM18 offset=off bundle=gmem18 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM19 offset=off bundle=gmem19 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM20 offset=off bundle=gmem20 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM21 offset=off bundle=gmem21 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM22 offset=off bundle=gmem22 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM23 offset=off bundle=gmem23 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM24 offset=off bundle=gmem24 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM25 offset=off bundle=gmem25 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM26 offset=off bundle=gmem26 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM27 offset=off bundle=gmem27 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM28 offset=off bundle=gmem28 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM29 offset=off bundle=gmem29 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM30 offset=off bundle=gmem30 max_widen_bitwidth=256
-#pragma HLS INTERFACE m_axi port=table_HBM31 offset=off bundle=gmem31 max_widen_bitwidth=256
+#pragma HLS INTERFACE m_axi port=table_HBM0  offset=off bundle=gmem0  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM1  offset=off bundle=gmem1  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM2  offset=off bundle=gmem2  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM3  offset=off bundle=gmem3  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM4  offset=off bundle=gmem4  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM5  offset=off bundle=gmem5  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM6  offset=off bundle=gmem6  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM7  offset=off bundle=gmem7  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM8  offset=off bundle=gmem8  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM9  offset=off bundle=gmem9  max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM10 offset=off bundle=gmem10 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM11 offset=off bundle=gmem11 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM12 offset=off bundle=gmem12 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM13 offset=off bundle=gmem13 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM14 offset=off bundle=gmem14 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM15 offset=off bundle=gmem15 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM16 offset=off bundle=gmem16 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM17 offset=off bundle=gmem17 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM18 offset=off bundle=gmem18 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM19 offset=off bundle=gmem19 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM20 offset=off bundle=gmem20 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM21 offset=off bundle=gmem21 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM22 offset=off bundle=gmem22 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM23 offset=off bundle=gmem23 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM24 offset=off bundle=gmem24 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM25 offset=off bundle=gmem25 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM26 offset=off bundle=gmem26 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM27 offset=off bundle=gmem27 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM28 offset=off bundle=gmem28 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM29 offset=off bundle=gmem29 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM30 offset=off bundle=gmem30 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
+#pragma HLS INTERFACE m_axi port=table_HBM31 offset=off bundle=gmem31 max_widen_bitwidth=256 num_read_outstanding=64 latency=32
 
 #pragma HLS INTERFACE axis port=idx_in
 #pragma HLS INTERFACE axis port=out
@@ -539,17 +539,31 @@ void load_access_idx(
 
 template<const long START_ADDR_0, const long AXI_PADDED_SIZE_0>
 void load_single_embedding_1_tables(
-    hls::stream<int>& s_idx_buffer, const t_hbm* table_RAM, 
+    hls::stream<int>& s_idx_buffer, const t_hbm_wide* table_RAM, 
     hls::stream<t_hbm>& s_embedding_buffer) {
 #pragma HLS INLINE off
 
+    // One lookup per cycle, pipelined across lookups so that many reads are
+    // in flight on the port (the original loop read each entry with a 4-beat
+    // burst and waited for it before starting the next lookup). Only word 0
+    // of each entry is used downstream (reduction_add_single kept the first
+    // element and dropped the rest), so read the full-width beat holding it
+    // and forward that word: the result is unchanged.
+    //
+    // The index is read without blocking: this pipeline is deep (the m_axi
+    // latency) and HLS implements it as a stall pipeline, where a blocking
+    // read of an empty stream would freeze every stage, holding the lookups
+    // already in flight until more requests arrived.
     while (true) {
-        long idx = s_idx_buffer.read();
-
-        long base_addr_0 = START_ADDR_0 + idx * AXI_PADDED_SIZE_0;
-        for (int j = 0; j < AXI_PADDED_SIZE_0; j++) {
-            #pragma HLS pipeline II=1
-            s_embedding_buffer.write(table_RAM[base_addr_0 + j]);
+        #pragma HLS pipeline II=1
+        int idx;
+        if (s_idx_buffer.read_nb(idx)) {
+            const long word_0 = START_ADDR_0 + (long)idx * AXI_PADDED_SIZE_0;
+            const t_hbm_wide beat = table_RAM[word_0 / HBM_WORDS_PER_WIDE];
+            const int lane = word_0 % HBM_WORDS_PER_WIDE;
+            t_hbm value = beat.range(AXI_WIDTH_HBM * lane + AXI_WIDTH_HBM - 1,
+                                     AXI_WIDTH_HBM * lane);
+            s_embedding_buffer.write(value);
         }
     }
 }
@@ -560,13 +574,11 @@ void reduction_add_single(
     hls::stream<int>& s_result_buffer)  {
 #pragma HLS INLINE off
 
+    // The load stage now forwards only word 0 of each embedding (what this
+    // stage used to keep, dropping the other TOTAL_VECTOR_LENGTH - 1).
     while (true) {
-        // load the first and consume the rest
-        int result = s_embedding_buffer.read();
-        for (int j = 0; j < TOTAL_VECTOR_LENGTH - 1; j++) {
-            s_embedding_buffer.read();
-        }
-        s_result_buffer.write(result);
+        #pragma HLS pipeline II=1
+        s_result_buffer.write(s_embedding_buffer.read());
     }
 }
 
