@@ -491,6 +491,9 @@
 
 
 typedef ap_int<AXI_WIDTH_HBM> t_hbm;
+// One full-width HBM beat (the m_axi port width), and its 32-bit words.
+typedef ap_uint<256> t_hbm_wide;
+#define HBM_WORDS_PER_WIDE (256 / AXI_WIDTH_HBM)
 // typedef ap_int<AXI_WIDTH_DDR> t_ddr;
 // typedef ap_int<AXI_WIDTH_PLRAM> t_plram;
 

@@ -2,119 +2,78 @@
 
 #include "constants.hpp"
 
+// One request: the index of the entry to look up in each table.
 struct t_idx_pack {
     int indices[32];
 };
 
+// Kernel geometry, from the model's constants (every table has the same
+// embedding dimension in the 1round models).
+#define EMB_DIM VECTOR_SIZE_HBM_BANK_0
+#define EMB_BITS (EMB_DIM * 32)
+// Response stream beat: 512 bits (one DCP flit / one 64-byte RAM word).
+#define OUT_BITS 512
+typedef ap_uint<OUT_BITS> t_out;
+// What a load stage hands the concatenation stage: a whole embedding when it
+// fits in a response beat (len4: 128 bits, len8: 256), else 512-bit pieces.
+#define PART_BITS (EMB_BITS < OUT_BITS ? EMB_BITS : OUT_BITS)
+#define PART_WORDS (PART_BITS / 32)
+typedef ap_uint<PART_BITS> t_part;
+#define PARTS_PER_LOOKUP (EMB_BITS / PART_BITS)
+#define PARTS_PER_OUT (OUT_BITS / PART_BITS)
+// 256-bit HBM beats read per lookup.
+#define BEATS_PER_LOOKUP (EMB_BITS < 256 ? 1 : EMB_BITS / 256)
+// Response beats per inference: all tables' embeddings, table 0 first.
+#define OUT_BEATS_PER_INFERENCE (HBM_BANK_NUM * PARTS_PER_LOOKUP / PARTS_PER_OUT)
+
 extern "C" {
 
-void vadd(  
-    const ap_int<AXI_WIDTH_HBM>* table_HBM0, const ap_int<AXI_WIDTH_HBM>* table_HBM1, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM2, const ap_int<AXI_WIDTH_HBM>* table_HBM3, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM4, const ap_int<AXI_WIDTH_HBM>* table_HBM5, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM6, const ap_int<AXI_WIDTH_HBM>* table_HBM7, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM8, const ap_int<AXI_WIDTH_HBM>* table_HBM9, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM10, const ap_int<AXI_WIDTH_HBM>* table_HBM11, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM12, const ap_int<AXI_WIDTH_HBM>* table_HBM13, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM14, const ap_int<AXI_WIDTH_HBM>* table_HBM15, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM16, const ap_int<AXI_WIDTH_HBM>* table_HBM17, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM18, const ap_int<AXI_WIDTH_HBM>* table_HBM19, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM20, const ap_int<AXI_WIDTH_HBM>* table_HBM21, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM22, const ap_int<AXI_WIDTH_HBM>* table_HBM23, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM24, const ap_int<AXI_WIDTH_HBM>* table_HBM25, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM26, const ap_int<AXI_WIDTH_HBM>* table_HBM27, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM28, const ap_int<AXI_WIDTH_HBM>* table_HBM29, 
-    const ap_int<AXI_WIDTH_HBM>* table_HBM30, const ap_int<AXI_WIDTH_HBM>* table_HBM31,
+void vadd(
+    const t_hbm_wide* table_HBM0, const t_hbm_wide* table_HBM1,
+    const t_hbm_wide* table_HBM2, const t_hbm_wide* table_HBM3,
+    const t_hbm_wide* table_HBM4, const t_hbm_wide* table_HBM5,
+    const t_hbm_wide* table_HBM6, const t_hbm_wide* table_HBM7,
+    const t_hbm_wide* table_HBM8, const t_hbm_wide* table_HBM9,
+    const t_hbm_wide* table_HBM10, const t_hbm_wide* table_HBM11,
+    const t_hbm_wide* table_HBM12, const t_hbm_wide* table_HBM13,
+    const t_hbm_wide* table_HBM14, const t_hbm_wide* table_HBM15,
+    const t_hbm_wide* table_HBM16, const t_hbm_wide* table_HBM17,
+    const t_hbm_wide* table_HBM18, const t_hbm_wide* table_HBM19,
+    const t_hbm_wide* table_HBM20, const t_hbm_wide* table_HBM21,
+    const t_hbm_wide* table_HBM22, const t_hbm_wide* table_HBM23,
+    const t_hbm_wide* table_HBM24, const t_hbm_wide* table_HBM25,
+    const t_hbm_wide* table_HBM26, const t_hbm_wide* table_HBM27,
+    const t_hbm_wide* table_HBM28, const t_hbm_wide* table_HBM29,
+    const t_hbm_wide* table_HBM30, const t_hbm_wide* table_HBM31,
     hls::stream<t_idx_pack>& idx_in,
-    hls::stream<int>& out
+    hls::stream<t_part> emb_out[HBM_BANK_NUM]
     );
 }
 
+// Requests are distributed to the channels in two levels (4 groups of 8), so
+// that no stage's stall depends on all 32 channel FIFOs (spread over the die).
+struct t_idx_group {
+    int indices[8];
+};
+
 void load_access_idx(
-    hls::stream<t_idx_pack>& idx_in,
-    hls::stream<int>& s_idx_buffer_HBM0, hls::stream<int>& s_idx_buffer_HBM1, 
-    hls::stream<int>& s_idx_buffer_HBM2, hls::stream<int>& s_idx_buffer_HBM3, 
-    hls::stream<int>& s_idx_buffer_HBM4, hls::stream<int>& s_idx_buffer_HBM5, 
-    hls::stream<int>& s_idx_buffer_HBM6, hls::stream<int>& s_idx_buffer_HBM7, 
-    hls::stream<int>& s_idx_buffer_HBM8, hls::stream<int>& s_idx_buffer_HBM9, 
-    hls::stream<int>& s_idx_buffer_HBM10, hls::stream<int>& s_idx_buffer_HBM11, 
-    hls::stream<int>& s_idx_buffer_HBM12, hls::stream<int>& s_idx_buffer_HBM13, 
-    hls::stream<int>& s_idx_buffer_HBM14, hls::stream<int>& s_idx_buffer_HBM15, 
-    hls::stream<int>& s_idx_buffer_HBM16, hls::stream<int>& s_idx_buffer_HBM17, 
-    hls::stream<int>& s_idx_buffer_HBM18, hls::stream<int>& s_idx_buffer_HBM19, 
-    hls::stream<int>& s_idx_buffer_HBM20, hls::stream<int>& s_idx_buffer_HBM21, 
-    hls::stream<int>& s_idx_buffer_HBM22, hls::stream<int>& s_idx_buffer_HBM23, 
-    hls::stream<int>& s_idx_buffer_HBM24, hls::stream<int>& s_idx_buffer_HBM25, 
-    hls::stream<int>& s_idx_buffer_HBM26, hls::stream<int>& s_idx_buffer_HBM27, 
-    hls::stream<int>& s_idx_buffer_HBM28, hls::stream<int>& s_idx_buffer_HBM29, 
-    hls::stream<int>& s_idx_buffer_HBM30, hls::stream<int>& s_idx_buffer_HBM31);
+    hls::stream<t_idx_pack>& idx_in, hls::stream<t_idx_group> s_idx_group[4]);
+
+void distribute_idx(
+    hls::stream<t_idx_group>& s_idx_group,
+    hls::stream<int>& o0, hls::stream<int>& o1, hls::stream<int>& o2,
+    hls::stream<int>& o3, hls::stream<int>& o4, hls::stream<int>& o5,
+    hls::stream<int>& o6, hls::stream<int>& o7);
 
 template<const long START_ADDR_0, const long AXI_PADDED_SIZE_0>
 void load_single_embedding_1_tables(
-    hls::stream<int>& s_idx_buffer, const t_hbm* table_RAM, 
-    hls::stream<t_hbm>& s_embedding_buffer);
+    hls::stream<int>& s_idx_buffer, const t_hbm_wide* table_RAM,
+    hls::stream<t_part>& s_embedding_buffer);
 
-template<const int TOTAL_VECTOR_LENGTH>
-void reduction_add_single(
-    hls::stream<t_hbm>& s_embedding_buffer, 
-    hls::stream<int>& s_result_buffer);
-
-void reduction_add_all(
-    hls::stream<int>& s_result_buffer_HBM0, hls::stream<int>& s_result_buffer_HBM1, 
-    hls::stream<int>& s_result_buffer_HBM2, hls::stream<int>& s_result_buffer_HBM3, 
-    hls::stream<int>& s_result_buffer_HBM4, hls::stream<int>& s_result_buffer_HBM5, 
-    hls::stream<int>& s_result_buffer_HBM6, hls::stream<int>& s_result_buffer_HBM7, 
-    hls::stream<int>& s_result_buffer_HBM8, hls::stream<int>& s_result_buffer_HBM9, 
-    hls::stream<int>& s_result_buffer_HBM10, hls::stream<int>& s_result_buffer_HBM11, 
-    hls::stream<int>& s_result_buffer_HBM12, hls::stream<int>& s_result_buffer_HBM13, 
-    hls::stream<int>& s_result_buffer_HBM14, hls::stream<int>& s_result_buffer_HBM15, 
-    hls::stream<int>& s_result_buffer_HBM16, hls::stream<int>& s_result_buffer_HBM17, 
-    hls::stream<int>& s_result_buffer_HBM18, hls::stream<int>& s_result_buffer_HBM19, 
-    hls::stream<int>& s_result_buffer_HBM20, hls::stream<int>& s_result_buffer_HBM21, 
-    hls::stream<int>& s_result_buffer_HBM22, hls::stream<int>& s_result_buffer_HBM23, 
-    hls::stream<int>& s_result_buffer_HBM24, hls::stream<int>& s_result_buffer_HBM25, 
-    hls::stream<int>& s_result_buffer_HBM26, hls::stream<int>& s_result_buffer_HBM27, 
-    hls::stream<int>& s_result_buffer_HBM28, hls::stream<int>& s_result_buffer_HBM29, 
-    hls::stream<int>& s_result_buffer_HBM30, hls::stream<int>& s_result_buffer_HBM31,
-    hls::stream<int>& s_vout_buffer);
-
-void write_results(
-    hls::stream<int>& s_vout_buffer, hls::stream<int>& out);
-
-
-const int trip_count_item_num = BATCH_NUM * BATCH_SIZE;
+void forward_embeddings(
+    hls::stream<t_part>& s_embedding_buffer, hls::stream<t_part>& emb_out);
 
 const int fifo_batch_size = FIFO_BATCH_SIZE;
-
-const int depth_s_embedding_buffer_HBM0 = VECTOR_SIZE_HBM_BANK_0 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM1 = VECTOR_SIZE_HBM_BANK_1 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM2 = VECTOR_SIZE_HBM_BANK_2 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM3 = VECTOR_SIZE_HBM_BANK_3 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM4 = VECTOR_SIZE_HBM_BANK_4 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM5 = VECTOR_SIZE_HBM_BANK_5 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM6 = VECTOR_SIZE_HBM_BANK_6 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM7 = VECTOR_SIZE_HBM_BANK_7 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM8 = VECTOR_SIZE_HBM_BANK_8 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM9 = VECTOR_SIZE_HBM_BANK_9 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM10 = VECTOR_SIZE_HBM_BANK_10 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM11 = VECTOR_SIZE_HBM_BANK_11 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM12 = VECTOR_SIZE_HBM_BANK_12 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM13 = VECTOR_SIZE_HBM_BANK_13 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM14 = VECTOR_SIZE_HBM_BANK_14 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM15 = VECTOR_SIZE_HBM_BANK_15 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM16 = VECTOR_SIZE_HBM_BANK_16 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM17 = VECTOR_SIZE_HBM_BANK_17 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM18 = VECTOR_SIZE_HBM_BANK_18 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM19 = VECTOR_SIZE_HBM_BANK_19 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM20 = VECTOR_SIZE_HBM_BANK_20 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM21 = VECTOR_SIZE_HBM_BANK_21 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM22 = VECTOR_SIZE_HBM_BANK_22 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM23 = VECTOR_SIZE_HBM_BANK_23 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM24 = VECTOR_SIZE_HBM_BANK_24 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM25 = VECTOR_SIZE_HBM_BANK_25 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM26 = VECTOR_SIZE_HBM_BANK_26 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM27 = VECTOR_SIZE_HBM_BANK_27 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM28 = VECTOR_SIZE_HBM_BANK_28 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM29 = VECTOR_SIZE_HBM_BANK_29 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM30 = VECTOR_SIZE_HBM_BANK_30 * FIFO_BATCH_SIZE;
-const int depth_s_embedding_buffer_HBM31 = VECTOR_SIZE_HBM_BANK_31 * FIFO_BATCH_SIZE;
+// Embedding FIFO per channel, in parts: room for a few lookups while the
+// concatenation stage drains the channels in table order.
+const int depth_s_embedding_buffer = 32;
